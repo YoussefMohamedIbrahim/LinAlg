@@ -150,4 +150,124 @@ namespace linalg
         }
         return result;
     }
+
+    template <Scalar T>
+    auto Matrix<T>::lu_decompose() const -> std::pair<Matrix, std::vector<size_type>>
+    {
+        if (rows_ != cols_)
+            throw std::invalid_argument("LU requires square matrix");
+
+        size_type n = rows_;
+        Matrix result = *this;
+        std::vector<size_type> P(n);
+
+        for (size_type i = 0; i < n; ++i)
+            P[i] = i;
+
+        for (size_type i = 0; i < n; ++i)
+        {
+            T maxVal = 0;
+            size_type pivotRow = i;
+            for (size_type k = i; k < n; ++k)
+            {
+                if (std::abs(result(k, i)) > maxVal)
+                {
+                    maxVal = std::abs(result(k, i));
+                    pivotRow = k;
+                }
+            }
+
+            if (maxVal < 1e-9)
+                throw std::runtime_error("Matrix is singular (Cannot invert)");
+
+            if (pivotRow != i)
+            {
+                std::swap(P[i], P[pivotRow]);
+                for (size_type j = 0; j < n; ++j)
+                {
+                    std::swap(result(i, j), result(pivotRow, j));
+                }
+            }
+
+            for (size_type j = i + 1; j < n; ++j)
+            {
+                result(j, i) /= result(i, i);
+                for (size_type k = i + 1; k < n; ++k)
+                {
+                    result(j, k) -= result(j, i) * result(i, k);
+                }
+            }
+        }
+
+        return {result, P};
+    }
+
+    template <Scalar T>
+    T Matrix<T>::determinant() const
+    {
+        try
+        {
+            auto [lu, P] = lu_decompose();
+            T det = 1;
+            for (size_type i = 0; i < rows_; ++i)
+            {
+                det *= lu(i, i);
+            }
+
+            int swaps = 0;
+            for (size_type i = 0; i < rows_; ++i)
+                if (P[i] != i)
+                    swaps++;
+            if ((swaps % 2) != 0)
+                det = -det;
+
+            return det;
+        }
+        catch (...)
+        {
+            return 0;
+        }
+    }
+
+    template <Scalar T>
+    Matrix<T> Matrix<T>::inverse() const
+    {
+        auto [lu, P] = lu_decompose();
+        size_type n = rows_;
+        Matrix inv(n, n);
+
+        for (size_type j = 0; j < n; ++j)
+        {
+
+            std::vector<T> x(n, 0);
+            for (size_type i = 0; i < n; ++i)
+            {
+                if (P[i] == j)
+                    x[i] = 1;
+            }
+
+            for (size_type i = 0; i < n; ++i)
+            {
+                for (size_type k = 0; k < i; ++k)
+                {
+                    x[i] -= lu(i, k) * x[k];
+                }
+            }
+
+            for (int i = n - 1; i >= 0; --i)
+            {
+                for (size_type k = i + 1; k < n; ++k)
+                {
+                    x[i] -= lu(i, k) * x[k];
+                }
+                x[i] /= lu(i, i);
+            }
+
+            for (size_type i = 0; i < n; ++i)
+            {
+                inv(i, j) = x[i];
+            }
+        }
+        return inv;
+    }
 }

@@ -56,12 +56,18 @@ namespace linalg
 
         [[nodiscard]] Matrix operator*(const Matrix &other) const;
 
+        [[nodiscard]] T determinant() const;
+
+        [[nodiscard]] Matrix inverse() const;
+
     private:
         std::vector<T> data_;
         size_type rows_;
         size_type cols_;
 
         [[nodiscard]] size_type index(size_type r, size_type c) const;
+
+        [[nodiscard]] std::pair<Matrix, std::vector<size_type>> lu_decompose() const;
     };
 
 }
