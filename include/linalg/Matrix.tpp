@@ -8,9 +8,9 @@ namespace linalg
     Matrix<T>::Matrix(size_type rows, size_type cols, T initial_value)
         : rows_(rows), cols_(cols)
     {
-        if (rows == 0 || cols == 0)
+        if (rows < 0 || cols < 0)
         {
-            throw std::invalid_argument("Matrix dimensions must be > 0");
+            throw std::invalid_argument("Matrix dimensions must be >= 0");
         }
         data_.resize(rows * cols, initial_value);
     }
