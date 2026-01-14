@@ -23,7 +23,7 @@ namespace linalg
         using size_type = std::size_t;
 
         explicit Matrix(size_type rows, size_type cols, T initial_value = T{});
-
+        Matrix() : rows_(0), cols_(0), data_() {}
         Matrix(const Matrix &) = default;
         Matrix &operator=(const Matrix &) = default;
         Matrix(Matrix &&) noexcept = default;
