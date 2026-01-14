@@ -73,6 +73,10 @@ namespace linalg
 
         [[nodiscard]] EigenPairs eigen() const;
 
+        [[nodiscard]] Matrix mean(int axis = 0) const;
+
+        [[nodiscard]] Matrix covariance() const;
+
     private:
         std::vector<T> data_;
         size_type rows_;

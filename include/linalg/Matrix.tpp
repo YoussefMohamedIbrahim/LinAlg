@@ -426,4 +426,58 @@ namespace linalg
 
         return {eigenvalues, eigenvectors};
     }
+
+    template <Scalar T>
+    Matrix<T> Matrix<T>::mean(int axis) const
+    {
+        // axis=0 means "collapse rows" (calculate mean for each column)
+        if (axis != 0)
+            throw std::invalid_argument("Only axis=0 supported for now");
+
+        Matrix<T> result(1, cols_, 0);
+
+        for (size_type i = 0; i < rows_; ++i)
+        {
+            for (size_type j = 0; j < cols_; ++j)
+            {
+                result(0, j) += (*this)(i, j);
+            }
+        }
+
+        for (size_type j = 0; j < cols_; ++j)
+        {
+            result(0, j) /= static_cast<T>(rows_);
+        }
+
+        return result;
+    }
+
+    template <Scalar T>
+    Matrix<T> Matrix<T>::covariance() const
+    {
+        if (rows_ < 2)
+            throw std::runtime_error("Need at least 2 rows for covariance");
+
+        Matrix<T> cov(cols_, cols_);
+        T scale = T{1} / (rows_ - 1);
+
+        for (size_type i = 0; i < cols_; ++i)
+        {
+            for (size_type j = i; j < cols_; ++j)
+            {
+                T sum = 0;
+                for (size_type k = 0; k < rows_; ++k)
+                {
+                    sum += (*this)(k, i) * (*this)(k, j);
+                }
+
+                T val = sum * scale;
+                cov(i, j) = val;
+
+                if (i != j)
+                    cov(j, i) = val;
+            }
+        }
+        return cov;
+    }
 }
