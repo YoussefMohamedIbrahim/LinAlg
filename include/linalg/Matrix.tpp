@@ -428,6 +428,72 @@ namespace linalg
     }
 
     template <Scalar T>
+    auto Matrix<T>::power_iteration(size_t k) const -> EigenPairs
+    {
+        if (rows_ != cols_)
+            throw std::invalid_argument("Matrix must be square");
+
+        size_type n = rows_;
+        Matrix<T> A = *this;
+
+        std::vector<T> eigenvalues;
+        std::vector<Matrix<T>> eigenvectors;
+
+        for (size_t i = 0; i < k; ++i)
+        {
+
+            Matrix<T> v(n, 1, T{1});
+
+            T prev_eigenvalue = 0;
+            T eigenvalue = 0;
+
+            for (int iter = 0; iter < 1000; ++iter)
+            {
+                // v = A * v
+                Matrix<T> v_next(n, 1, 0);
+
+                for (size_type r = 0; r < n; ++r)
+                {
+                    T sum = 0;
+                    for (size_type c = 0; c < n; ++c)
+                    {
+                        sum += A(r, c) * v(c, 0);
+                    }
+                    v_next(r, 0) = sum;
+                }
+                v = v_next;
+
+                T norm = v.column_norm(0);
+                if (norm < 1e-9)
+                    break; // Safety
+                for (size_type r = 0; r < n; ++r)
+                    v(r, 0) /= norm;
+
+                eigenvalue = norm;
+
+                if (std::abs(eigenvalue - prev_eigenvalue) < 1e-6)
+                {
+                    break;
+                }
+                prev_eigenvalue = eigenvalue;
+            }
+
+            eigenvalues.push_back(eigenvalue);
+            eigenvectors.push_back(v);
+
+            for (size_type r = 0; r < n; ++r)
+            {
+                for (size_type c = 0; c < n; ++c)
+                {
+                    A(r, c) -= eigenvalue * v(r, 0) * v(c, 0);
+                }
+            }
+        }
+
+        return {eigenvalues, eigenvectors};
+    }
+
+    template <Scalar T>
     Matrix<T> Matrix<T>::mean(int axis) const
     {
         // axis=0 means "collapse rows" (calculate mean for each column)

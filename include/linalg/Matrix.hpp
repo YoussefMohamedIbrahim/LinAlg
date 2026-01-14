@@ -73,6 +73,8 @@ namespace linalg
 
         [[nodiscard]] EigenPairs eigen() const;
 
+        [[nodiscard]] EigenPairs power_iteration(size_type k) const;
+
         [[nodiscard]] Matrix mean(int axis = 0) const;
 
         [[nodiscard]] Matrix covariance() const;
