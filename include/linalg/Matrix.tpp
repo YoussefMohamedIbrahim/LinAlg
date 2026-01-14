@@ -115,21 +115,21 @@ namespace linalg
     {
         if (cols_ != other.rows())
         {
-            throw std::invalid_argument("Dimension mismatch: Cols of A != Rows of B");
+            throw std::invalid_argument("Dimension mismatch");
         }
 
         Matrix<T> result(rows_, other.cols());
 
         for (size_type i = 0; i < rows_; ++i)
         {
-            for (size_type j = 0; j < other.cols(); ++j)
+            for (size_type k = 0; k < cols_; ++k)
             {
-                T sum = T{};
-                for (size_type k = 0; k < cols_; ++k)
+                T temp = (*this)(i, k);
+
+                for (size_type j = 0; j < other.cols(); ++j)
                 {
-                    sum += (*this)(i, k) * other(k, j);
+                    result[i][j] += temp * other(k, j);
                 }
-                result[i][j] = sum;
             }
         }
         return result;
