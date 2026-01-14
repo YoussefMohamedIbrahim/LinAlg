@@ -46,6 +46,8 @@ namespace linalg
         [[nodiscard]] size_type cols() const noexcept;
         [[nodiscard]] size_type size() const noexcept;
 
+        [[nodiscard]] static Matrix identity(size_type n);
+
         void print() const;
 
         Matrix &operator+=(const Matrix &other);
@@ -60,6 +62,14 @@ namespace linalg
 
         [[nodiscard]] Matrix inverse() const;
 
+        struct EigenPairs
+        {
+            std::vector<T> eigenvalues;
+            std::vector<Matrix<T>> eigenvectors;
+        };
+
+        [[nodiscard]] EigenPairs eigen() const;
+
     private:
         std::vector<T> data_;
         size_type rows_;
@@ -68,6 +78,10 @@ namespace linalg
         [[nodiscard]] size_type index(size_type r, size_type c) const;
 
         [[nodiscard]] std::pair<Matrix, std::vector<size_type>> lu_decompose() const;
+
+        [[nodiscard]] std::pair<Matrix, Matrix> qr_decompose() const;
+
+        [[nodiscard]] T column_norm(size_type col_idx) const;
     };
 
 }

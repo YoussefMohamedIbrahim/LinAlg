@@ -51,6 +51,17 @@ namespace linalg
     auto Matrix<T>::size() const noexcept -> size_type { return data_.size(); }
 
     template <Scalar T>
+    Matrix<T> Matrix<T>::identity(size_type n)
+    {
+        Matrix<T> result(n, n, 0);
+        for (size_type i = 0; i < n; i++)
+        {
+            result(i, i) = 1;
+        }
+        return result;
+    }
+
+    template <Scalar T>
     void Matrix<T>::print() const
     {
         std::cout << "[" << rows_ << "x" << cols_ << " Matrix]:\n";
@@ -269,5 +280,115 @@ namespace linalg
             }
         }
         return inv;
+    }
+
+    template <Scalar T>
+    T Matrix<T>::column_norm(size_type col_idx) const
+    {
+        T sum = 0;
+        for (size_type i = 0; i < rows_; ++i)
+        {
+            sum += (*this)(i, col_idx) * (*this)(i, col_idx);
+        }
+        return std::sqrt(sum);
+    }
+
+    template <Scalar T>
+    std::pair<Matrix<T>, Matrix<T>> Matrix<T>::qr_decompose() const
+    {
+        size_type n = rows_;
+        size_type m = cols_;
+
+        Matrix<T> Q(n, m);
+        Matrix<T> R(m, m, 0);
+
+        Q = *this;
+
+        for (size_type i = 0; i < m; ++i)
+        {
+            R(i, i) = Q.column_norm(i);
+
+            for (size_type k = 0; k < n; ++k)
+            {
+                Q(k, i) /= R(i, i);
+            }
+
+            for (size_type j = i + 1; j < m; ++j)
+            {
+                T dot = 0;
+                for (size_type k = 0; k < n; ++k)
+                {
+                    dot += Q(k, i) * Q(k, j);
+                }
+                R(i, j) = dot;
+
+                for (size_type k = 0; k < n; ++k)
+                {
+                    Q(k, j) -= dot * Q(k, i);
+                }
+            }
+        }
+
+        return {Q, R};
+    }
+
+    template <Scalar T>
+    auto Matrix<T>::eigen() const -> EigenPairs
+    {
+        if (rows_ != cols_)
+            throw std::invalid_argument("Matrix must be square");
+
+        size_type n = rows_;
+        Matrix<T> A_iter = *this;
+
+        size_type max_iter = 1000;
+        for (size_type k = 0; k < max_iter; ++k)
+        {
+            T off_diagonal_sum = 0;
+            for (size_type i = 1; i < n; ++i)
+            {
+                for (size_type j = 0; j < i; ++j)
+                {
+                    off_diagonal_sum += std::abs(A_iter(i, j));
+                }
+            }
+            if (off_diagonal_sum < 1e-9)
+                break;
+
+            auto [Q, R] = A_iter.qr_decompose();
+            A_iter = R * Q;
+        }
+
+        std::vector<T> eigenvalues;
+        for (size_type i = 0; i < n; ++i)
+        {
+            eigenvalues.push_back(A_iter(i, i));
+        }
+
+        std::vector<Matrix<T>> eigenvectors;
+        Matrix<T> I = Matrix<T>::identity(n);
+
+        for (T lambda : eigenvalues)
+        {
+            Matrix<T> v(n, 1, T{1});
+
+            T perturbed_lambda = lambda + 1e-6;
+
+            Matrix<T> M = (*this) - (I * (Matrix<T>(n, n, perturbed_lambda)));
+
+            Matrix<T> M_inv = M.inverse();
+
+            for (int iter = 0; iter < 10; ++iter)
+            {
+                v = M_inv * v;
+
+                T norm = v.column_norm(0);
+                for (size_type i = 0; i < n; ++i)
+                    v(i, 0) /= norm;
+            }
+            eigenvectors.push_back(v);
+        }
+
+        return {eigenvalues, eigenvectors};
     }
 }
