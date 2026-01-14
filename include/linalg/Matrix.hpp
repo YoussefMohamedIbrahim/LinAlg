@@ -63,6 +63,8 @@ namespace linalg
 
         [[nodiscard]] Matrix inverse() const;
 
+        [[nodiscard]] Matrix transpose() const;
+
         struct EigenPairs
         {
             std::vector<T> eigenvalues;

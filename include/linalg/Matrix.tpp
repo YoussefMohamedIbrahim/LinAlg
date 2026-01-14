@@ -287,6 +287,33 @@ namespace linalg
     }
 
     template <Scalar T>
+    Matrix<T> Matrix<T>::transpose() const
+    {
+        Matrix<T> result(cols_, rows_);
+
+        const size_type blockSize = 64;
+
+        for (size_type i = 0; i < rows_; i += blockSize)
+        {
+            for (size_type j = 0; j < cols_; j += blockSize)
+            {
+
+                size_type iMax = std::min(i + blockSize, rows_);
+                size_type jMax = std::min(j + blockSize, cols_);
+
+                for (size_type ii = i; ii < iMax; ++ii)
+                {
+                    for (size_type jj = j; jj < jMax; ++jj)
+                    {
+                        result(jj, ii) = (*this)(ii, jj);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    template <Scalar T>
     T Matrix<T>::column_norm(size_type col_idx) const
     {
         T sum = 0;
