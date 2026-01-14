@@ -374,7 +374,11 @@ namespace linalg
 
             T perturbed_lambda = lambda + 1e-6;
 
-            Matrix<T> M = (*this) - (I * (Matrix<T>(n, n, perturbed_lambda)));
+            Matrix<T> M = *this;
+            for (size_type i = 0; i < n; ++i)
+            {
+                M(i, i) -= perturbed_lambda;
+            }
 
             Matrix<T> M_inv = M.inverse();
 
