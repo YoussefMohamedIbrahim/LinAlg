@@ -54,7 +54,6 @@ namespace linalg
         Matrix &operator-=(const Matrix &other);
         [[nodiscard]] Matrix operator-(const Matrix &other) const;
 
-        [[nodiscard]] Matrix multiply(const Matrix &other) const;
         [[nodiscard]] Matrix operator*(const Matrix &other) const;
 
     private:

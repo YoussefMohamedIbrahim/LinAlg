@@ -111,7 +111,7 @@ namespace linalg
     }
 
     template <Scalar T>
-    Matrix<T> Matrix<T>::multiply(const Matrix &other) const
+    Matrix<T> Matrix<T>::operator*(const Matrix &other) const
     {
         if (cols_ != other.rows())
         {
@@ -134,11 +134,4 @@ namespace linalg
         }
         return result;
     }
-
-    template <Scalar T>
-    Matrix<T> Matrix<T>::operator*(const Matrix &other) const
-    {
-        return multiply(other);
-    }
-
 }
