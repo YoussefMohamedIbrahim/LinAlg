@@ -69,7 +69,11 @@ namespace linalg
         {
             for (size_type j = 0; j < cols_; ++j)
             {
-                std::cout << std::setw(8) << std::setprecision(4) << (*this)(i, j) << " ";
+                T val = (*this)(i, j);
+                if (std::abs(val) < 1e-10)
+                    val = 0.0;
+
+                std::cout << std::setw(8) << std::setprecision(4) << val << " ";
             }
             std::cout << "\n";
         }
