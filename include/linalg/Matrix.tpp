@@ -120,15 +120,31 @@ namespace linalg
 
         Matrix<T> result(rows_, other.cols());
 
-        for (size_type i = 0; i < rows_; ++i)
-        {
-            for (size_type k = 0; k < cols_; ++k)
-            {
-                T temp = (*this)(i, k);
+        const size_type blockSize = 64;
 
-                for (size_type j = 0; j < other.cols(); ++j)
+        for (size_type ii = 0; ii < rows_; ii += blockSize)
+        {
+            for (size_type kk = 0; kk < cols_; kk += blockSize)
+            {
+                for (size_type jj = 0; jj < other.cols(); jj += blockSize)
                 {
-                    result[i][j] += temp * other(k, j);
+                    size_type iMax = std::min(ii + blockSize, rows_);
+                    size_type kMax = std::min(kk + blockSize, cols_);
+                    size_type jMax = std::min(jj + blockSize, other.cols());
+
+                    for (size_type i = ii; i < iMax; ++i)
+                    {
+                        for (size_type k = kk; k < kMax; ++k)
+                        {
+
+                            T temp = (*this)(i, k);
+
+                            for (size_type j = jj; j < jMax; ++j)
+                            {
+                                result[i][j] += temp * other(k, j);
+                            }
+                        }
+                    }
                 }
             }
         }
