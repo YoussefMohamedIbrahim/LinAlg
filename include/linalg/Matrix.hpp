@@ -1,0 +1,69 @@
+#pragma once
+
+#include <vector>
+#include <concepts>
+#include <iostream>
+#include <iomanip>
+#include <stdexcept>
+#include <span>
+
+namespace linalg
+{
+
+    template <typename T>
+    concept Scalar = std::is_arithmetic_v<T>;
+
+    template <Scalar T>
+    class Matrix
+    {
+    public:
+        using value_type = T;
+        using size_type = std::size_t;
+
+        explicit Matrix(size_type rows, size_type cols, T initial_value = T{});
+
+        Matrix(const Matrix &) = default;
+        Matrix &operator=(const Matrix &) = default;
+        Matrix(Matrix &&) noexcept = default;
+        Matrix &operator=(Matrix &&) noexcept = default;
+        ~Matrix() = default;
+
+        std::span<T> operator[](size_type row)
+        {
+            return std::span<T>(&data_[row * cols_], cols_);
+        }
+
+        std::span<const T> operator[](size_type row) const
+        {
+            return std::span<const T>(&data_[row * cols_], cols_);
+        }
+
+        T &operator()(size_type row, size_type col);
+        const T &operator()(size_type row, size_type col) const;
+
+        [[nodiscard]] size_type rows() const noexcept;
+        [[nodiscard]] size_type cols() const noexcept;
+        [[nodiscard]] size_type size() const noexcept;
+
+        void print() const;
+
+        Matrix &operator+=(const Matrix &other);
+        [[nodiscard]] Matrix operator+(const Matrix &other) const;
+
+        Matrix &operator-=(const Matrix &other);
+        [[nodiscard]] Matrix operator-(const Matrix &other) const;
+
+        [[nodiscard]] Matrix multiply(const Matrix &other) const;
+        [[nodiscard]] Matrix operator*(const Matrix &other) const;
+
+    private:
+        std::vector<T> data_;
+        size_type rows_;
+        size_type cols_;
+
+        [[nodiscard]] size_type index(size_type r, size_type c) const;
+    };
+
+}
+
+#include "Matrix.tpp"
