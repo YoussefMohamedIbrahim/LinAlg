@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <stdexcept>
 #include <span>
+#include <cmath>
 
 namespace linalg
 {
