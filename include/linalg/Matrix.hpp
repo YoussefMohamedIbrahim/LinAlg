@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <concepts>
+#include <type_traits>
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
